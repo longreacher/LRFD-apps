@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LRFD App</title>
+  <meta http-equiv="refresh" content="1; url=https://docs.google.com/forms/d/e/1FAIpQLSf5WyTO3RVjn8BaQQ0X6OUB05Q7cKNN2ytYyJA2RZ80VKIPzQ/viewform?usp=header">
+  <title>LRFD Truck Check App</title>
 
   <!-- Android / Chrome / Standard PWA -->
   <link rel="manifest" href="/LRFD-apps/manifest.json">
@@ -22,22 +23,30 @@
       padding: 24px;
       background: #f5f7fa;
       color: #1a202c;
+      text-align: center;
     }
-    .card {
-      max-width: 480px;
-      margin: 40px auto;
+    .box {
+      max-width: 420px;
+      margin: 60px auto;
       background: #ffffff;
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-    h1 { color: #003366; margin-top: 0; }
+    a {
+      color: #003366;
+      font-weight: 600;
+    }
   </style>
+
+  <script>
+    window.location.replace("https://docs.google.com/forms/d/e/1FAIpQLSf5WyTO3RVjn8BaQQ0X6OUB05Q7cKNN2ytYyJA2RZ80VKIPzQ/viewform?usp=header");
+  </script>
 </head>
 <body>
-  <div class="card">
-    <h1>LRFD App</h1>
-    <p>Welcome! Add this app to your phone's home screen for quick access.</p>
+  <div class="box">
+    <p>Opening LRFD Truck Check App...</p>
+    <p><a id="target-link" href="https://docs.google.com/forms/d/e/1FAIpQLSf5WyTO3RVjn8BaQQ0X6OUB05Q7cKNN2ytYyJA2RZ80VKIPzQ/viewform?usp=header">Tap here if you aren't redirected automatically</a></p>
   </div>
 </body>
 </html>
