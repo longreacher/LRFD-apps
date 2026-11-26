@@ -18,13 +18,24 @@
   <script>
     const TARGET_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf5WyTO3RVjn8BaQQ0X6OUB05Q7cKNN2ytYyJA2RZ80VKIPzQ/viewform?usp=header";
 
-    // Redirect immediately ONLY when launched from the Home Screen icon
+    // 1. Redirect immediately ONLY when launched from the Home Screen icon
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true;
 
     if (isStandalone) {
       window.location.replace(TARGET_URL);
+    }
+
+    // 2. On Android inside Facebook/Messenger in-app browser, break out to Chrome
+    const ua = navigator.userAgent || "";
+    const isFacebookBrowser = /FBAN|FBAV|FB_IAB|Messenger/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+
+    if (isFacebookBrowser && isAndroid) {
+      window.location.replace(
+        "intent://longreacher.github.io/LRFD-apps/#Intent;scheme=https;package=com.android.chrome;end"
+      );
     }
   </script>
 
@@ -38,7 +49,7 @@
     }
     .card {
       max-width: 440px;
-      margin: 32px auto;
+      margin: 24px auto;
       background: #ffffff;
       padding: 28px 24px;
       border-radius: 14px;
@@ -62,6 +73,19 @@
       margin: 0 0 18px;
       color: #4a5568;
     }
+    .fb-warning {
+      background: #fff5f5;
+      border: 2px solid #c53030;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: left;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      color: #742a2a;
+    }
+    .fb-warning strong {
+      color: #9b2c2c;
+    }
     .instructions {
       background: #edf2f7;
       border-radius: 10px;
@@ -73,11 +97,11 @@
     .instructions strong {
       color: #1a202c;
     }
-    .instructions ol {
+    .instructions ol, .fb-warning ol {
       margin: 8px 0 0;
       padding-left: 20px;
     }
-    .instructions li {
+    .instructions li, .fb-warning li {
       margin-bottom: 6px;
     }
     .btn {
@@ -96,7 +120,11 @@
     .btn-install {
       background: #003366;
       color: #ffffff;
-      display: none; /* Shown automatically on supported Android browsers */
+      display: none;
+    }
+    .btn-copy {
+      background: #003366;
+      color: #ffffff;
     }
     .btn-open {
       background: #e2e8f0;
@@ -113,14 +141,25 @@
     <h1>LRFD Truck Check App</h1>
     <p>Add this shortcut to your phone's home screen for one-tap access to the truck check form.</p>
 
+    <!-- Shown ONLY when opened inside Facebook's in-app browser -->
+    <div id="fb-warning" class="fb-warning hidden">
+      <strong>⚠️ You are inside the Facebook browser</strong>
+      <p style="margin: 6px 0 8px; color: #742a2a;">Facebook blocks adding icons to your home screen. Open this page in your phone's main browser first:</p>
+      <ol>
+        <li>Tap the <strong>•••</strong> (or <strong>Share</strong>) icon at the bottom-right of your screen.</li>
+        <li>Tap <strong>Open in External Browser</strong> (or <strong>Open in Safari / Chrome</strong>).</li>
+      </ol>
+      <button id="copy-btn" class="btn btn-copy" style="margin-top: 12px; margin-bottom: 0;">Copy Link to Paste in Safari/Chrome</button>
+    </div>
+
     <!-- One-tap install button for Android Chrome/Edge -->
     <button id="install-btn" class="btn btn-install">Install App to Home Screen</button>
 
     <!-- iPhone / iPad Safari instructions -->
     <div id="ios-instructions" class="instructions hidden">
-      <strong>On iPhone / iPad:</strong>
+      <strong>On iPhone / iPad (Safari):</strong>
       <ol>
-        <li>Tap the <strong>Share</strong> icon (square with upward arrow) .</li>
+        <li>Tap the <strong>Share</strong> icon (square with upward arrow) at the bottom of Safari.</li>
         <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
         <li>Tap <strong>Add</strong> in the top-right corner.</li>
       </ol>
@@ -141,23 +180,41 @@
   </div>
 
   <script>
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const userAgent = navigator.userAgent || "";
+    const inFB = /FBAN|FBAV|FB_IAB|Messenger/i.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+    const fbWarning = document.getElementById("fb-warning");
     const iosBox = document.getElementById("ios-instructions");
     const androidBox = document.getElementById("android-instructions");
     const installBtn = document.getElementById("install-btn");
+    const copyBtn = document.getElementById("copy-btn");
 
-    if (isIOS) {
+    if (inFB) {
+      fbWarning.classList.remove("hidden");
+    } else if (isIOS) {
       iosBox.classList.remove("hidden");
     } else {
       androidBox.classList.remove("hidden");
     }
+
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText("https://longreacher.github.io/LRFD-apps/");
+        copyBtn.textContent = "Link Copied! Paste in Safari/Chrome";
+      } catch (err) {
+        copyBtn.textContent = "Copy: https://longreacher.github.io/LRFD-apps/";
+      }
+    });
 
     // Capture Android's native install prompt if available
     let deferredPrompt;
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = "block";
+      if (!inFB) {
+        installBtn.style.display = "block";
+      }
     });
 
     installBtn.addEventListener("click", async () => {
